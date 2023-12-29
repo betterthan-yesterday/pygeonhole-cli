@@ -9,31 +9,19 @@ from pigeonhole import (
 
 app = typer.Typer()
 
-def get_pigeon() -> pigeonhole.Pigeon:
+def get_PHC() -> pigeonhole.PH_Controller:
     if config.CONFIG_FILE_PATH.exists():
         db_path = database.get_database_path(config.CONFIG_FILE_PATH)
     else:
         typer.secho('Config file not found. Please run "pigeonhole init"', fg=typer.colors.RED)
         raise typer.Exit(1)
     if db_path.exists():
-        return pigeonhole.Pigeon(db_path)
+        return pigeonhole.PH_Controller(db_path)
     else:
         typer.secho('Database not found. Please run "pigeonhole init"', fg=typer.colors.RED)
         raise typer.Exit(1)
     
 def display_files() -> None:
-    pigeon = get_pigeon()
-
-    flags, error = pigeon.get_flags(database.DEFAULT_DB_PATH)
-    data, error = pigeon.get_data(".")
-
-    filenames =  data[0] if flags["SHOW_HIDDEN_FILES"] else [f for f in data[0] if not f[0] == "."]
-    dirnames = data[1] if flags["SHOW_DIRS"] else []
-
-    if error:
-        typer.secho(f'Adding to-do failed with "{ERRORS[error]}"', fg=typer.colors.RED)
-        raise typer.Exit(1)
-
     # Format table
     if len(filenames) == 0 and len(dirnames) == 0:
         typer.secho("There are no items in the directory", fg=typer.colors.RED)
@@ -47,31 +35,30 @@ def display_files() -> None:
     columns = (
         "#",
         "Name",
-        "Date Modifed",
-        # "| Size  " ,
+        "Last Modified",
+        "Size",
         # "| Kind  "
     )
-    header = f"{columns[0]:<{maxlen_id}}  | {columns[1]:<{maxleng_name}}  | {columns[2]:<0}|"
+    header = f"{columns[0]:<{maxlen_id}}  |"\
+             f" {columns[1]:<{maxleng_name}}  |"\
+             f" {columns[2]:<0}  |"
     
     typer.secho(f'\n{database.CWD_PATH}:\n', fg=typer.colors.BLUE, bold=True)
     typer.secho(header, fg=typer.colors.BLUE, bold=True)
     typer.secho("-" * len(header), fg=typer.colors.BLUE)
+
     for id, name in enumerate(dirnames, 1):
-        typer.secho(
-            f"{id:<{maxlen_id}}  "
-            f"| {name+'/':<{maxleng_name}}  "
-            f"| {(len(columns[2]) - len(str()) - 2) * ' '}  ",
-            # f"| {desc}",
-            fg=typer.colors.BLUE
-        )
+        line = f"{id:<{maxlen_id}}  |"\
+               f" {name+'/':<{maxleng_name}}  |"\
+               f" {(len(columns[2]) - len(str()) - 2) * ' '}  "
+        typer.secho(line, fg=typer.colors.BLUE)
+        
     for id, name in enumerate(filenames, 1):
-        typer.secho(
-            f"{id+len(dirnames):<{maxlen_id}}  "
-            f"| {name:<{maxleng_name}}  "
-            f"| {(len(columns[2]) - len(str()) - 2) * ' '}",
-            # f"| {desc}",
-            fg=typer.colors.BLUE
-        )
+        line = f"{id+len(dirnames):<{maxlen_id}}  |"\
+               f" {name:<{maxleng_name}}  |"\
+               f" {(len(columns[2]) - len(str()) - 2) * ' '}  "
+        typer.secho(line, fg=typer.colors.BLUE)
+
     typer.secho("-" * len(header) + "\n", fg=typer.colors.BLUE)
     
 @app.command()
@@ -89,7 +76,30 @@ def init() -> None:
         raise typer.Exit(1)
     
     typer.secho(f"The pigeonhole database is {db_path}", fg=typer.colors.GREEN)
-    display_files()
+
+    # Input files into database
+    phc = get_PHC()
+
+    dir_result = phc.get_dir_data(".")
+    if dir_result.error:
+        typer.secho(f'Initialization failed with "{ERRORS[dir_result.error]}"', fg=typer.colors.RED)
+        raise typer.Exit(1)
+
+    filenames =  [f for f in dir_result.dir_data[0] if not f[0] == "."] # Remove hidden files
+    formatted_files = []
+    for file in filenames:
+        format_result = phc.format_file(file)
+        if format_result.error:
+            typer.secho(f'Initialization failed with "{ERRORS[format_result.error]}"', fg=typer.colors.RED)
+            raise typer.Exit(1)
+        formatted_files.append(format_result.file_data)
+
+    write_result = phc.set_db_data(formatted_files)
+    if write_result.error:
+        typer.secho(f'Initialization failed with "{ERRORS[write_result.error]}"', fg=typer.colors.RED)
+        raise typer.Exit(1)
+
+    # display_files()
 
 @app.command()
 def list(

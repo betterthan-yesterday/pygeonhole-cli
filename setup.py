@@ -16,7 +16,7 @@ setup(
     long_description=README,
     long_description_content_type="text/markdown",
     url="https://github.com/betterthan-yesterday/file-organizer",
-    author="zahash",
+    author="betterthan-yesterday",
     author_email="polwilliam0@gmail.com",
     # license="MIT",
     entry_points={

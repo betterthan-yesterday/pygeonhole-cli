@@ -1,26 +1,38 @@
 # Pigeonhole Model Controller
-from os import walk
+import datetime
+from os import walk, stat
 from pathlib import Path
-from typing import List, NamedTuple
+from typing import Any, Dict, List, NamedTuple
 
-from pigeonhole import SUCCESS, DIR_READ_ERROR, DB_READ_ERROR
-from pigeonhole.database import DatabaseHandler, DBResponse
+from pigeonhole import SUCCESS, DIR_READ_ERROR
+from pigeonhole.database import DatabaseHandler, DatabaseData
 
-class DirectoryData(NamedTuple):
-    data: List[List]
+class FileData(NamedTuple):
+    file_data: Dict[str, Any]
     error: int
 
-class Pigeon:
+class DirectoryData(NamedTuple):
+    dir_data: List[List]
+    error: int
+
+class PH_Controller:
     def __init__(self, db_path: Path) -> None:
         self._db_handler = DatabaseHandler(db_path)
 
-    def get_flags(self, db_path: Path) -> DBResponse:
-        flags, error = self._db_handler.read_todos()
-        if error == DB_READ_ERROR:
-            return DBResponse({}, error)
-        return DBResponse(flags, error)
+    def format_file(self, filename: str) -> FileData:
+        try:
+            stats = stat(filename)
+        except OSError:
+            return FileData({}, DIR_READ_ERROR)
 
-    def get_data(self, dir_path: Path) -> DirectoryData:
+        file = {
+            "Name": filename,
+            "Last Modified": str(datetime.datetime.fromtimestamp(stats.st_ctime))[:-7],
+            "Size": stats.st_size,
+        }
+        return FileData(file, SUCCESS)
+
+    def get_dir_data(self, dir_path: Path) -> DirectoryData:
         filenames = []
         dirnames = []
         try:
@@ -32,6 +44,15 @@ class Pigeon:
             return DirectoryData([], DIR_READ_ERROR)
 
         return DirectoryData([filenames, dirnames], SUCCESS)
+    
+    def get_db_data(self) -> DatabaseData:
+        read_result = self._db_handler.read_db_data()
+        return read_result
+    
+    def set_db_data(self, db_data: List[Dict[str, Any]]) -> DatabaseData:
+        write_result = self._db_handler.write_db_data(db_data)
+        return write_result
+
 
     # def add(self, description: List[str], priority: int=2) -> CurrentTodo:
     #     description_text = " ".join (description)
