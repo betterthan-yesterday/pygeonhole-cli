@@ -1,13 +1,14 @@
 import configparser
 import json
 from pathlib import Path
+from os import getcwd
 from typing import Any, Dict, List, NamedTuple
 
-from pigeonhole import DB_READ_ERROR, DB_WRITE_ERROR, JSON_ERROR, SUCCESS
+from pigeonhole import DB_READ_ERROR, DB_WRITE_ERROR, JSON_ERROR, SUCCESS, DISPLAY_FLAGS
 
-DEFAULT_DB_FILE_PATH = Path.home().joinpath(
-    "." + Path.home().stem + "_todo.json"
-)
+CWD_PATH = getcwd()
+CWD_NAME = CWD_PATH.split("/")[-1]
+DEFAULT_DB_PATH = "." + CWD_NAME + "_pigeonhole.json"
 
 def get_database_path(config_file: Path) -> Path:
     config_parser = configparser.ConfigParser()
@@ -16,13 +17,14 @@ def get_database_path(config_file: Path) -> Path:
 
 def init_database(db_path: Path) -> int:
     try:
-        db_path.write_text("[]")
+        with db_path.open("w") as db:
+            json.dump(DISPLAY_FLAGS, db, indent=4)
         return SUCCESS
     except OSError:
         return DB_WRITE_ERROR
     
 class DBResponse(NamedTuple):
-    todo_list: List[Dict[str, Any]]
+    display_flag: Dict[str, bool]
     error: int
 
 class DatabaseHandler:
@@ -39,10 +41,10 @@ class DatabaseHandler:
         except OSError:
             return DBResponse([], DB_READ_ERROR)
         
-    def write_todos(self, todo_list: List[Dict[str, Any]]) -> DBResponse:
+    def write_todos(self, display_flag: Dict[str, Any]) -> DBResponse:
         try:
             with self._db_path.open("w") as db:
-                json.dump(todo_list, db, indent=4)
-            return DBResponse(todo_list, SUCCESS)
+                json.dump(display_flag, db, indent=4)
+            return DBResponse(display_flag, SUCCESS)
         except OSError:
-            return DBResponse(todo_list, DB_WRITE_ERROR)
+            return DBResponse(display_flag, DB_WRITE_ERROR)

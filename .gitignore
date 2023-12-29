@@ -1,6 +1,8 @@
 venv/
 todo
-json_test
+.file-organizer_pigeonhole.json
 
 # For setup.py
 file_organizer.egg-info/
+
+test.py
