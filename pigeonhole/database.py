@@ -4,7 +4,14 @@ from pathlib import Path
 from os import getcwd
 from typing import Any, Dict, List, NamedTuple
 
-from pigeonhole import DB_READ_ERROR, DB_WRITE_ERROR, JSON_ERROR, SUCCESS, DISPLAY_FLAGS
+from pigeonhole import DB_READ_ERROR, DB_WRITE_ERROR, JSON_ERROR, SUCCESS
+
+ITEM_DATA = {
+    "Name": "item_name",
+    "Mode": "stat.filemode(stats.st_mode)",
+    "Last Modified": "str(datetime.datetime.fromtimestamp(stats.st_ctime))[:-7]",
+    "Size": "str(stats.st_size)",
+}
 
 CWD_PATH = getcwd()
 CWD_NAME = CWD_PATH.split("/")[-1]

@@ -22,41 +22,41 @@ def get_PHC() -> pigeonhole.PH_Controller:
         raise typer.Exit(1)
     
 def display_files() -> None:
-    # Format table
-    if len(filenames) == 0 and len(dirnames) == 0:
+    phc = get_PHC()
+
+    db_result = phc.get_db_data()
+    if db_result.error:
+        typer.secho(f'Displaying items failed with "{ERRORS[db_result.error]}"', fg=typer.colors.RED,)
+        raise typer.Exit(1)
+    if len(db_result.data) == 0:
         typer.secho("There are no items in the directory", fg=typer.colors.RED)
         raise typer.Exit()
     
-    maxlen_id = len(str(len(dirnames)+len(filenames)))
-    maxlen_filename = len(max(filenames, key=len)) if len(filenames) != 0 else 0
-    maxlen_dirname = len(max(dirnames, key=len)) if len(dirnames) != 0 else 0
-    maxleng_name = max([maxlen_filename, maxlen_dirname])
+    data_lists = {}
+    for key in db_result.data[0].keys():
+        data_lists[key] = [item[key] for item in db_result.data]
+    
+    # Format table
+    maxlen_id = len(str(len(db_result.data)))
+    maxlen_keys = {}
+    for key, value in data_lists.items():
+        maxlen_keys[key] = max(len(max(value, key=len)), len(key))
 
-    columns = (
-        "#",
-        "Name",
-        "Last Modified",
-        "Size",
-        # "| Kind  "
-    )
-    header = f"{columns[0]:<{maxlen_id}}  |"\
-             f" {columns[1]:<{maxleng_name}}  |"\
-             f" {columns[2]:<0}  |"
+    columns = ["#"]
+    columns.extend(data_lists.keys())
+    header = f"{columns[0]:<{maxlen_id}}  |"
+    for col in columns[1:]:
+        header += f" {col:<{maxlen_keys[col]}}  |"
     
     typer.secho(f'\n{database.CWD_PATH}:\n', fg=typer.colors.BLUE, bold=True)
     typer.secho(header, fg=typer.colors.BLUE, bold=True)
     typer.secho("-" * len(header), fg=typer.colors.BLUE)
+    
 
-    for id, name in enumerate(dirnames, 1):
-        line = f"{id:<{maxlen_id}}  |"\
-               f" {name+'/':<{maxleng_name}}  |"\
-               f" {(len(columns[2]) - len(str()) - 2) * ' '}  "
-        typer.secho(line, fg=typer.colors.BLUE)
-        
-    for id, name in enumerate(filenames, 1):
-        line = f"{id+len(dirnames):<{maxlen_id}}  |"\
-               f" {name:<{maxleng_name}}  |"\
-               f" {(len(columns[2]) - len(str()) - 2) * ' '}  "
+    for id in range(1, len(db_result.data)+1):
+        line = f"{id:<{maxlen_id}}  |"
+        for col in columns[1:]:
+            line += f" {data_lists[col][id-1]:<{maxlen_keys[col]}}  |"
         typer.secho(line, fg=typer.colors.BLUE)
 
     typer.secho("-" * len(header) + "\n", fg=typer.colors.BLUE)
@@ -88,11 +88,11 @@ def init() -> None:
     filenames =  [f for f in dir_result.dir_data[0] if not f[0] == "."] # Remove hidden files
     formatted_files = []
     for file in filenames:
-        format_result = phc.format_file(file)
+        format_result = phc.format_item(file)
         if format_result.error:
             typer.secho(f'Initialization failed with "{ERRORS[format_result.error]}"', fg=typer.colors.RED)
             raise typer.Exit(1)
-        formatted_files.append(format_result.file_data)
+        formatted_files.append(format_result.item_data)
 
     write_result = phc.set_db_data(formatted_files)
     if write_result.error:

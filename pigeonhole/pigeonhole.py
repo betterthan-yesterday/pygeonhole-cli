@@ -1,14 +1,15 @@
 # Pigeonhole Model Controller
 import datetime
-from os import walk, stat
+import os
+import stat
 from pathlib import Path
 from typing import Any, Dict, List, NamedTuple
 
 from pigeonhole import SUCCESS, DIR_READ_ERROR
-from pigeonhole.database import DatabaseHandler, DatabaseData
+from pigeonhole.database import DatabaseHandler, DatabaseData, ITEM_DATA
 
-class FileData(NamedTuple):
-    file_data: Dict[str, Any]
+class ItemData(NamedTuple):
+    item_data: Dict[str, Any]
     error: int
 
 class DirectoryData(NamedTuple):
@@ -19,24 +20,23 @@ class PH_Controller:
     def __init__(self, db_path: Path) -> None:
         self._db_handler = DatabaseHandler(db_path)
 
-    def format_file(self, filename: str) -> FileData:
+    def format_item(self, item_name: str) -> ItemData:
         try:
-            stats = stat(filename)
+            stats = os.stat(item_name)
         except OSError:
-            return FileData({}, DIR_READ_ERROR)
+            return ItemData({}, DIR_READ_ERROR)
 
-        file = {
-            "Name": filename,
-            "Last Modified": str(datetime.datetime.fromtimestamp(stats.st_ctime))[:-7],
-            "Size": stats.st_size,
-        }
-        return FileData(file, SUCCESS)
+        item_data = ITEM_DATA.copy()
+        for key, value in item_data.items():
+            item_data[key] = eval(value)
+
+        return ItemData(item_data, SUCCESS)
 
     def get_dir_data(self, dir_path: Path) -> DirectoryData:
         filenames = []
         dirnames = []
         try:
-            for (dirpath, dirname, filename) in walk(dir_path):
+            for (dirpath, dirname, filename) in os.walk(dir_path):
                 filenames.extend(filename)
                 dirnames.extend(dirname)
                 break
