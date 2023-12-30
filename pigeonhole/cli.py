@@ -51,7 +51,6 @@ def display_files() -> None:
     typer.secho(f'\n{database.CWD_PATH}:\n', fg=typer.colors.BLUE, bold=True)
     typer.secho(header, fg=typer.colors.BLUE, bold=True)
     typer.secho("-" * len(header), fg=typer.colors.BLUE)
-    www
 
     for id in range(1, len(db_result.data)+1):
         line = f"{id:<{maxlen_id}}  |"
