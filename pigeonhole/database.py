@@ -8,14 +8,14 @@ from pigeonhole import DB_READ_ERROR, DB_WRITE_ERROR, JSON_ERROR, SUCCESS
 
 ITEM_DATA = {
     "Name": "item_name",
-    "Mode": "stat.filemode(stats.st_mode)",
     "Last Modified": "str(datetime.datetime.fromtimestamp(stats.st_ctime))[:-7]",
     "Size": "str(stats.st_size)",
+    "Extension": "os.path.splitext(item_name)[1]"
 }
 
 CWD_PATH = getcwd()
 CWD_NAME = CWD_PATH.split("/")[-1]
-DEFAULT_DB_PATH = "." + CWD_NAME + "_pigeonhole.json"
+DEFAULT_DB_PATH = "." + CWD_NAME + "_ph.json"
 
 def get_database_path(config_file: Path) -> Path:
     config_parser = configparser.ConfigParser()

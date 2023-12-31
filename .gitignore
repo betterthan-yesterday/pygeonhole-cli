@@ -1,8 +1,11 @@
 venv/
 todo
-.file-organizer_pigeonhole.json
+.file-organizer_ph.json
+.file-organizer_ph_flags.json
 
 # For setup.py
 file_organizer.egg-info/
 
 test.py
+
+pigeonhole/__pycache__

@@ -7,18 +7,20 @@ from typing import Any, Dict, List, NamedTuple
 
 from pigeonhole import SUCCESS, DIR_READ_ERROR
 from pigeonhole.database import DatabaseHandler, DatabaseData, ITEM_DATA
+from pigeonhole.flags import FlagsHandler, FlagsData
 
 class ItemData(NamedTuple):
     item_data: Dict[str, Any]
     error: int
 
 class DirectoryData(NamedTuple):
-    dir_data: List[List]
+    dir_data: List
     error: int
 
 class PH_Controller:
-    def __init__(self, db_path: Path) -> None:
+    def __init__(self, db_path: Path, flags_path: Path) -> None:
         self._db_handler = DatabaseHandler(db_path)
+        self._flags_handler = FlagsHandler(flags_path)
 
     def format_item(self, item_name: str) -> ItemData:
         try:
@@ -30,20 +32,31 @@ class PH_Controller:
         for key, value in item_data.items():
             item_data[key] = eval(value)
 
+        if stat.S_ISDIR(stats.st_mode):
+            if "Name" in item_data:
+                item_data["Name"] += "/"
+            if "Size" in item_data:
+                item_data["Size"] = "--"
+            if "Extension" in item_data:
+                item_data["Extension"] = "--"
+
         return ItemData(item_data, SUCCESS)
 
-    def get_dir_data(self, dir_path: Path) -> DirectoryData:
-        filenames = []
-        dirnames = []
+    def get_dir_data(self, flag_show_hidden: bool, flag_show_dir: bool) -> DirectoryData:
+        item_names = []
         try:
-            for (dirpath, dirname, filename) in os.walk(dir_path):
-                filenames.extend(filename)
-                dirnames.extend(dirname)
+            for (dirpath, dirname, filename) in os.walk("."):
+                item_names.extend(filename)
+                if flag_show_dir:
+                    item_names.extend(dirname)
                 break
         except OSError:
             return DirectoryData([], DIR_READ_ERROR)
+        
+        if not flag_show_hidden:
+            item_names = [item for item in item_names if not item[0] == "."]
 
-        return DirectoryData([filenames, dirnames], SUCCESS)
+        return DirectoryData(item_names, SUCCESS)
     
     def get_db_data(self) -> DatabaseData:
         read_result = self._db_handler.read_db_data()
@@ -51,6 +64,14 @@ class PH_Controller:
     
     def set_db_data(self, db_data: List[Dict[str, Any]]) -> DatabaseData:
         write_result = self._db_handler.write_db_data(db_data)
+        return write_result
+    
+    def get_flags_data(self) -> FlagsData:
+        read_result = self._flags_handler.read_flags_data()
+        return read_result
+    
+    def set_flags_data(self) -> FlagsData:
+        write_result = self._flags_handler.write_flags_data()
         return write_result
 
 

@@ -10,11 +10,11 @@ from pigeonhole import (
 CONFIG_DIR_PATH = Path(typer.get_app_dir(__app_name__))
 CONFIG_FILE_PATH = CONFIG_DIR_PATH / "config.ini"
 
-def init_app(db_path: str) -> int:
+def init_app(db_path: str, flags_path: str) -> int:
     config_code = _init_config_file()
     if config_code != SUCCESS:
         return config_code
-    database_code = _create_database(db_path)
+    database_code = _create_database(db_path, flags_path)
     if database_code != SUCCESS:
         return database_code
     return SUCCESS
@@ -30,9 +30,9 @@ def _init_config_file() -> int:
         return FILE_ERROR
     return SUCCESS
 
-def _create_database(db_path: str) -> int:
+def _create_database(db_path: str, flags_path: str) -> int:
     config_parser = configparser.ConfigParser()
-    config_parser["General"] = {"database": db_path}
+    config_parser["General"] = {"database": db_path, "flags": flags_path}
     try:
         with CONFIG_FILE_PATH.open("w") as file:
             config_parser.write(file)
