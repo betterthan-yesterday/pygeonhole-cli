@@ -46,9 +46,9 @@ class PH_Controller:
         item_names = []
         try:
             for (dirpath, dirname, filename) in os.walk("."):
-                item_names.extend(filename)
                 if flag_show_dir:
                     item_names.extend(dirname)
+                item_names.extend(filename)
                 break
         except OSError:
             return DirectoryData([], DIR_READ_ERROR)
@@ -70,8 +70,8 @@ class PH_Controller:
         read_result = self._flags_handler.read_flags_data()
         return read_result
     
-    def set_flags_data(self) -> FlagsData:
-        write_result = self._flags_handler.write_flags_data()
+    def set_flags_data(self, flags_data: Dict[str, Any]) -> FlagsData:
+        write_result = self._flags_handler.write_flags_data(flags_data)
         return write_result
 
 

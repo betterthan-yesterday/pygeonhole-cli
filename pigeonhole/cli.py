@@ -22,9 +22,11 @@ def get_PHC() -> pigeonhole.PH_Controller:
         typer.secho('Database not found. Please run "pigeonhole init"', fg=typer.colors.RED)
         raise typer.Exit(1)
 
-# This function essentially resets the program (though it does not reset
-# the flags) so it is necessary to warn the user of adding and removing
-# files while in the middle of execution.
+"""
+This function essentially resets the program (though it does not reset
+the flags) so it is necessary to warn the user of adding and removing
+files while in the middle of execution.
+"""
 def update_db() -> None:
     phc = get_PHC()
 
@@ -58,7 +60,7 @@ def update_db() -> None:
             raise typer.Exit(1)
 
 
-def display_files() -> None:
+def display_db() -> None:
     phc = get_PHC()
 
     db_result = phc.get_db_data()
@@ -140,15 +142,22 @@ def init() -> None:
         typer.secho(f'Initialization failed with "{ERRORS[write_result.error]}"', fg=typer.colors.RED)
         raise typer.Exit(1)
 
-    display_files()
+    display_db()
 
 @app.command()
 def show(
-    show_all_files: bool = typer.Option(False, "-a", help="Show hidden files"),
-    show_dirs: bool = typer.Option(False, "-d", help="Show folders")
+    show_hidden: bool = typer.Option(False, "--hidden", "-a", help="Show hidden files and directories"),
+    show_dirs: bool = typer.Option(False, "-d", help="Show directories")
 ) -> None:
+    command_flags = locals().copy()
+    phc = get_PHC()
+    write_result = phc.set_flags_data(command_flags)
+    if write_result.error:
+        typer.secho(f'Writing flags failed with "{ERRORS[write_result.error]}"', fg=typer.colors.RED,)
+        raise typer.Exit(1)
+    
     update_db()
-    display_files()
+    display_db()
 
 
 @app.command()

@@ -23,4 +23,5 @@ ERRORS = {
     FLAGS_WRITE_ERROR: "flags write error",
     DIR_READ_ERROR: "directory read error",
     ID_ERROR: "file id error",
+    JSON_ERROR: "json format error"
 }
