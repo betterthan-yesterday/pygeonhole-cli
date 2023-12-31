@@ -4,7 +4,7 @@ from typing import Optional
 import typer
 
 from pigeonhole import (
-    ERRORS, __app_name__, __version__, config, database, pigeonhole
+    ERRORS, __app_name__, __version__, config, database, flags, pigeonhole
 )
 
 app = typer.Typer()
@@ -12,15 +12,52 @@ app = typer.Typer()
 def get_PHC() -> pigeonhole.PH_Controller:
     if config.CONFIG_FILE_PATH.exists():
         db_path = database.get_database_path(config.CONFIG_FILE_PATH)
+        flags_path = flags.get_flags_path(config.CONFIG_FILE_PATH)
     else:
         typer.secho('Config file not found. Please run "pigeonhole init"', fg=typer.colors.RED)
         raise typer.Exit(1)
-    if db_path.exists():
-        return pigeonhole.PH_Controller(db_path)
+    if db_path.exists() and flags_path.exists():
+        return pigeonhole.PH_Controller(db_path, flags_path)
     else:
         typer.secho('Database not found. Please run "pigeonhole init"', fg=typer.colors.RED)
         raise typer.Exit(1)
+
+# This function essentially resets the program (though it does not reset
+# the flags) so it is necessary to warn the user of adding and removing
+# files while in the middle of execution.
+def update_db() -> None:
+    phc = get_PHC()
+
+    flags_result = phc.get_flags_data()
+    if flags_result.error:
+        typer.secho(f'Displaying items failed with "{ERRORS[flags_result.error]}"', fg=typer.colors.RED,)
+        raise typer.Exit(1)
+
+    db_result = phc.get_db_data()
+    if db_result.error:
+        typer.secho(f'Displaying items failed with "{ERRORS[db_result.error]}"', fg=typer.colors.RED,)
+        raise typer.Exit(1)
+
+    dir_result = phc.get_dir_data(*flags_result.flags.values())
+    if dir_result.error:
+        typer.secho(f'Displaying items failed with "{ERRORS[dir_result.error]}"', fg=typer.colors.RED,)
+        raise typer.Exit(1)
     
+    if len(db_result.data) != len(dir_result.dir_data):
+        formatted_files = []
+        for item in dir_result.dir_data:
+            format_result = phc.format_item(item)
+            if format_result.error:
+                typer.secho(f'Update failed with "{ERRORS[format_result.error]}"', fg=typer.colors.RED)
+                raise typer.Exit(1)
+            formatted_files.append(format_result.item_data)
+
+        write_result = phc.set_db_data(formatted_files)
+        if write_result.error:
+            typer.secho(f'Update failed with "{ERRORS[write_result.error]}"', fg=typer.colors.RED)
+            raise typer.Exit(1)
+
+
 def display_files() -> None:
     phc = get_PHC()
 
@@ -31,7 +68,7 @@ def display_files() -> None:
     if len(db_result.data) == 0:
         typer.secho("There are no items in the directory", fg=typer.colors.RED)
         raise typer.Exit()
-    
+
     data_lists = {}
     for key in db_result.data[0].keys():
         data_lists[key] = [item[key] for item in db_result.data]
@@ -44,18 +81,18 @@ def display_files() -> None:
 
     columns = ["#"]
     columns.extend(data_lists.keys())
-    header = f"{columns[0]:<{maxlen_id}}  |"
+    header = f"{columns[0]:<{maxlen_id}} |"
     for col in columns[1:]:
-        header += f" {col:<{maxlen_keys[col]}}  |"
+        header += f" {col:<{maxlen_keys[col]}} |"
     
     typer.secho(f'\n{database.CWD_PATH}:\n', fg=typer.colors.BLUE, bold=True)
     typer.secho(header, fg=typer.colors.BLUE, bold=True)
     typer.secho("-" * len(header), fg=typer.colors.BLUE)
 
     for id in range(1, len(db_result.data)+1):
-        line = f"{id:<{maxlen_id}}  |"
+        line = f"{id:<{maxlen_id}} |"
         for col in columns[1:]:
-            line += f" {data_lists[col][id-1]:<{maxlen_keys[col]}}  |"
+            line += f" {data_lists[col][id-1]:<{maxlen_keys[col]}} |"
         typer.secho(line, fg=typer.colors.BLUE)
 
     typer.secho("-" * len(header) + "\n", fg=typer.colors.BLUE)
@@ -63,8 +100,9 @@ def display_files() -> None:
 @app.command()
 def init() -> None:
     db_path = database.DEFAULT_DB_PATH
+    flags_path = flags.DEFAULT_FLAGS_PATH
 
-    app_init_error = config.init_app(db_path)
+    app_init_error = config.init_app(db_path, flags_path)
     if app_init_error:
         typer.secho(f'Creating config file failed with "{ERRORS[app_init_error]}"', fg=typer.colors.RED,)
         raise typer.Exit(1)
@@ -74,20 +112,24 @@ def init() -> None:
         typer.secho(f'Creating database file failed with "{ERRORS[db_init_error]}"', fg=typer.colors.RED,)
         raise typer.Exit(1)
     
+    flags_init_error = flags.init_flags(Path(flags_path))
+    if flags_init_error:
+        typer.secho(f'Creating flags file failed with "{ERRORS[flags_init_error]}"', fg=typer.colors.RED,)
+        raise typer.Exit(1)
+    
     typer.secho(f"The pigeonhole database is {db_path}", fg=typer.colors.GREEN)
 
     # Input files into database
     phc = get_PHC()
 
-    dir_result = phc.get_dir_data(".")
+    dir_result = phc.get_dir_data(False, False)
     if dir_result.error:
         typer.secho(f'Initialization failed with "{ERRORS[dir_result.error]}"', fg=typer.colors.RED)
         raise typer.Exit(1)
 
-    filenames =  [f for f in dir_result.dir_data[0] if not f[0] == "."] # Remove hidden files
     formatted_files = []
-    for file in filenames:
-        format_result = phc.format_item(file)
+    for item in dir_result.dir_data:
+        format_result = phc.format_item(item)
         if format_result.error:
             typer.secho(f'Initialization failed with "{ERRORS[format_result.error]}"', fg=typer.colors.RED)
             raise typer.Exit(1)
@@ -98,13 +140,14 @@ def init() -> None:
         typer.secho(f'Initialization failed with "{ERRORS[write_result.error]}"', fg=typer.colors.RED)
         raise typer.Exit(1)
 
-    # display_files()
+    display_files()
 
 @app.command()
-def list(
+def show(
     show_all_files: bool = typer.Option(False, "-a", help="Show hidden files"),
     show_dirs: bool = typer.Option(False, "-d", help="Show folders")
 ) -> None:
+    update_db()
     display_files()
 
 
