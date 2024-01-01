@@ -9,6 +9,7 @@ from pigeonhole.database import CWD_NAME
 FLAGS = {
     "show_hidden": False,
     "show_dirs": False,
+    "repeat_show": True,
 }
 
 DEFAULT_FLAGS_PATH = "." + CWD_NAME + "_ph_flags.json"

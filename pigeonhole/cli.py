@@ -40,7 +40,7 @@ def update_db() -> None:
         typer.secho(f'Displaying items failed with "{ERRORS[db_result.error]}"', fg=typer.colors.RED,)
         raise typer.Exit(1)
 
-    dir_result = phc.get_dir_data(*flags_result.flags.values())
+    dir_result = phc.get_dir_data(flags_result.flags["show_hidden"], flags_result.flags["show_dirs"])
     if dir_result.error:
         typer.secho(f'Displaying items failed with "{ERRORS[dir_result.error]}"', fg=typer.colors.RED,)
         raise typer.Exit(1)
@@ -147,11 +147,23 @@ def init() -> None:
 @app.command()
 def show(
     show_hidden: bool = typer.Option(False, "--hidden", "-a", help="Show hidden files and directories"),
-    show_dirs: bool = typer.Option(False, "-d", help="Show directories")
+    show_dirs: bool = typer.Option(False, "-d", help="Show directories"),
+    repeat_show: bool = typer.Option(False, "--repeat", "-r", help="Display list after every command"),
 ) -> None:
     command_flags = locals().copy()
     phc = get_PHC()
-    write_result = phc.set_flags_data(command_flags)
+
+    read_result = phc.get_flags_data()
+    if read_result.error:
+        typer.secho(f'Writing flags failed with "{ERRORS[read_result.error]}"', fg=typer.colors.RED,)
+        raise typer.Exit(1)
+    
+    curr_flags = read_result.flags
+    # Stored flags are inverted if they are called
+    for flag in curr_flags.keys():
+        curr_flags[flag] = not curr_flags[flag] if command_flags[flag] else curr_flags[flag]
+
+    write_result = phc.set_flags_data(curr_flags)
     if write_result.error:
         typer.secho(f'Writing flags failed with "{ERRORS[write_result.error]}"', fg=typer.colors.RED,)
         raise typer.Exit(1)
@@ -162,7 +174,15 @@ def show(
 
 @app.command()
 def sort() -> None:
-    list(False, False)
+    phc = get_PHC()
+
+    read_result = phc.get_flags_data()
+    if read_result.error:
+        typer.secho(f'Writing flags failed with "{ERRORS[read_result.error]}"', fg=typer.colors.RED,)
+        raise typer.Exit(1)
+    
+    if read_result.flags["repeat_show"]:
+        display_db()
 
 # @app.command()
 # def add(
