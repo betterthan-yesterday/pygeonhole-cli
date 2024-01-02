@@ -10,6 +10,7 @@ FLAGS = {
     "show_hidden": False,
     "show_dirs": False,
     "repeat_show": True,
+    "maxlen": [],
 }
 
 DEFAULT_FLAGS_PATH = "." + CWD_NAME + "_ph_flags.json"
@@ -28,7 +29,7 @@ def init_flags(flags_path: Path) -> int:
         return FLAGS_WRITE_ERROR
     
 class FlagsData(NamedTuple):
-    flags: Dict[str, bool]
+    flags: Dict[str, Any]
     error: int
 
 class FlagsHandler:

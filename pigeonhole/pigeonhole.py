@@ -28,19 +28,22 @@ class PH_Controller:
         except OSError:
             return ItemData({}, DIR_READ_ERROR)
 
-        item_data = ITEM_DATA.copy()
-        for key, value in item_data.items():
-            item_data[key] = eval(value)
+        curr_items = self.get_db_data()
+        if curr_items.error:
+            return ItemData({}, curr_items.error)
+
+        curr_item_format = curr_items.data
+        curr_item_data = {}
+        for key in curr_item_format[0].keys():
+            curr_item_data[key] = eval(ITEM_DATA[key])
 
         if stat.S_ISDIR(stats.st_mode):
-            if "Name" in item_data:
-                item_data["Name"] += "/"
-            if "Size" in item_data:
-                item_data["Size"] = "--"
-            if "Extension" in item_data:
-                item_data["Extension"] = "--"
+            if "Size" in curr_item_data:
+                curr_item_data["Size"] = "--"
+            if "Extension" in curr_item_data:
+                curr_item_data["Extension"] = "--"
 
-        return ItemData(item_data, SUCCESS)
+        return ItemData(curr_item_data, SUCCESS)
 
     def get_dir_data(self, flag_show_hidden: bool, flag_show_dir: bool) -> DirectoryData:
         item_names = []

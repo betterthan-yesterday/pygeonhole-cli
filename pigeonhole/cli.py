@@ -25,7 +25,8 @@ def get_PHC() -> pigeonhole.PH_Controller:
 """
 This function essentially resets the program (though it does not reset
 the flags) so it is necessary to warn the user of adding and removing
-files while in the middle of execution.
+files while in the middle of execution. Probably better to just tell
+user to re-init.
 """
 def update_db() -> None:
     phc = get_PHC()
@@ -81,6 +82,9 @@ def display_db() -> None:
     for key, value in data_lists.items():
         maxlen_keys[key] = max(len(max(value, key=len)), len(key))
 
+        if key == "Name":
+            maxlen_keys[key] += 1
+
     columns = ["#"]
     columns.extend(data_lists.keys())
     header = f"{columns[0]:<{maxlen_id}} |"
@@ -94,7 +98,13 @@ def display_db() -> None:
     for id in range(1, len(db_result.data)+1):
         line = f"{id:<{maxlen_id}} |"
         for col in columns[1:]:
-            line += f" {data_lists[col][id-1]:<{maxlen_keys[col]}} |"
+            str_literal = data_lists[col][id-1]
+            spaces = maxlen_keys[col]
+
+            if col == "Name" and data_lists["Mode"][id-1] == "drwxr-xr-x":
+                str_literal += "/"
+                
+            line += f" {str_literal:<{spaces}} |"
         typer.secho(line, fg=typer.colors.BLUE)
 
     typer.secho("-" * len(header) + "\n", fg=typer.colors.BLUE)
@@ -155,12 +165,12 @@ def show(
 
     read_result = phc.get_flags_data()
     if read_result.error:
-        typer.secho(f'Writing flags failed with "{ERRORS[read_result.error]}"', fg=typer.colors.RED,)
+        typer.secho(f'Reading flags failed with "{ERRORS[read_result.error]}"', fg=typer.colors.RED,)
         raise typer.Exit(1)
     
     curr_flags = read_result.flags
     # Stored flags are inverted if they are called
-    for flag in curr_flags.keys():
+    for flag in command_flags.keys():
         curr_flags[flag] = not curr_flags[flag] if command_flags[flag] else curr_flags[flag]
 
     write_result = phc.set_flags_data(curr_flags)
@@ -171,17 +181,41 @@ def show(
     update_db()
     display_db()
 
-
 @app.command()
-def sort() -> None:
+def format() -> None:
     phc = get_PHC()
 
-    read_result = phc.get_flags_data()
-    if read_result.error:
-        typer.secho(f'Writing flags failed with "{ERRORS[read_result.error]}"', fg=typer.colors.RED,)
+    flag_result = phc.get_flags_data()
+    if flag_result.error:
+        typer.secho(f'Reading flags failed with "{ERRORS[flag_result.error]}"', fg=typer.colors.RED,)
         raise typer.Exit(1)
     
-    if read_result.flags["repeat_show"]:
+
+    if flag_result.flags["repeat_show"]:
+        display_db()
+
+@app.command()
+def sort(
+    sorting_key: str = typer.Argument(..., help="Name of column to sort"),
+    reverse_order: bool = typer.Option(False, "--reverse", "-r", help="Reverse order of sort")
+) -> None:
+    phc = get_PHC()
+
+    flag_result = phc.get_flags_data()
+    if flag_result.error:
+        typer.secho(f'Reading flags failed with "{ERRORS[flag_result.error]}"', fg=typer.colors.RED,)
+        raise typer.Exit(1)
+    
+    db_result = phc.get_db_data()
+    if db_result.error:
+        typer.secho(f'Sorting items failed with "{ERRORS[db_result.error]}"', fg=typer.colors.RED,)
+        raise typer.Exit(1)
+
+    curr_db = db_result.data
+    dirs = []
+    files = []
+
+    if flag_result.flags["repeat_show"]:
         display_db()
 
 # @app.command()

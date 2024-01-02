@@ -8,9 +8,10 @@ from pigeonhole import DB_READ_ERROR, DB_WRITE_ERROR, JSON_ERROR, SUCCESS
 
 ITEM_DATA = {
     "Name": "item_name",
+    "Mode": "stat.filemode(stats.st_mode)",
     "Last Modified": "str(datetime.datetime.fromtimestamp(stats.st_ctime))[:-7]",
     "Size": "str(stats.st_size)",
-    "Extension": "os.path.splitext(item_name)[1]"
+    "Ext.": "os.path.splitext(item_name)[1]"
 }
 
 CWD_PATH = getcwd()
@@ -24,7 +25,9 @@ def get_database_path(config_file: Path) -> Path:
 
 def init_database(db_path: Path) -> int:
     try:
-        db_path.write_text("[]")
+        with db_path.open("w") as db:
+            json.dump([ITEM_DATA], db, indent=4)
+        return SUCCESS
         return SUCCESS
     except OSError:
         return DB_WRITE_ERROR
