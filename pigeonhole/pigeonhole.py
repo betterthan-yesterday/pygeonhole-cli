@@ -40,23 +40,28 @@ class PH_Controller:
         if stat.S_ISDIR(stats.st_mode):
             if "Size" in curr_item_data:
                 curr_item_data["Size"] = "--"
-            if "Extension" in curr_item_data:
-                curr_item_data["Extension"] = "--"
+            if "Ext." in curr_item_data:
+                curr_item_data["Ext."] = "--"
 
         return ItemData(curr_item_data, SUCCESS)
 
-    def get_dir_data(self, flag_show_hidden: bool, flag_show_dir: bool) -> DirectoryData:
+    def get_dir_data(self, dir_path: str = ".") -> DirectoryData:
+        flags_result = self.get_flags_data()
+        if flags_result.error:
+            return DirectoryData([], flags_result.error)
+        flags = flags_result.flags
+
         item_names = []
         try:
-            for (dirpath, dirname, filename) in os.walk("."):
-                if flag_show_dir:
+            for (dirpath, dirname, filename) in os.walk(dir_path):
+                if flags["show_dirs"]:
                     item_names.extend(dirname)
                 item_names.extend(filename)
                 break
         except OSError:
             return DirectoryData([], DIR_READ_ERROR)
         
-        if not flag_show_hidden:
+        if not flags["show_hidden"]:
             item_names = [item for item in item_names if not item[0] == "."]
 
         return DirectoryData(item_names, SUCCESS)

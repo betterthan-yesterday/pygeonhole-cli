@@ -31,17 +31,12 @@ user to re-init.
 def update_db() -> None:
     phc = get_PHC()
 
-    flags_result = phc.get_flags_data()
-    if flags_result.error:
-        typer.secho(f'Displaying items failed with "{ERRORS[flags_result.error]}"', fg=typer.colors.RED,)
-        raise typer.Exit(1)
-
     db_result = phc.get_db_data()
     if db_result.error:
         typer.secho(f'Displaying items failed with "{ERRORS[db_result.error]}"', fg=typer.colors.RED,)
         raise typer.Exit(1)
 
-    dir_result = phc.get_dir_data(flags_result.flags["show_hidden"], flags_result.flags["show_dirs"])
+    dir_result = phc.get_dir_data()
     if dir_result.error:
         typer.secho(f'Displaying items failed with "{ERRORS[dir_result.error]}"', fg=typer.colors.RED,)
         raise typer.Exit(1)
@@ -103,7 +98,7 @@ def display_db() -> None:
 
             if col == "Name" and data_lists["Mode"][id-1] == "drwxr-xr-x":
                 str_literal += "/"
-                
+
             line += f" {str_literal:<{spaces}} |"
         typer.secho(line, fg=typer.colors.BLUE)
 
@@ -134,7 +129,7 @@ def init() -> None:
     # Input files into database
     phc = get_PHC()
 
-    dir_result = phc.get_dir_data(False, False)
+    dir_result = phc.get_dir_data()
     if dir_result.error:
         typer.secho(f'Initialization failed with "{ERRORS[dir_result.error]}"', fg=typer.colors.RED)
         raise typer.Exit(1)

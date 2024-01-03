@@ -8,4 +8,4 @@ file_organizer.egg-info/
 
 test.py
 
-pigeonhole/__pycache__
+*__pycache__
