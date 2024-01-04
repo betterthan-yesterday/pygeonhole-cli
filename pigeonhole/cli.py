@@ -177,7 +177,9 @@ def show(
     display_db()
 
 @app.command()
-def format() -> None:
+def format(
+    
+) -> None:
     phc = get_PHC()
 
     flag_result = phc.get_flags_data()

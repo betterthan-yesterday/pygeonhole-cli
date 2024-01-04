@@ -10,7 +10,8 @@ FLAGS = {
     "show_hidden": False,
     "show_dirs": False,
     "repeat_show": True,
-    "maxlen": [],
+    "maxlen": {},
+    "no_show": [],
 }
 
 DEFAULT_FLAGS_PATH = "." + CWD_NAME + "_ph_flags.json"

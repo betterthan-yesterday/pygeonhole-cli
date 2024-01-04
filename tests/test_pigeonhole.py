@@ -4,11 +4,9 @@ import os
 from typer.testing import CliRunner
 
 from pigeonhole import (
-    DB_READ_ERROR,
     SUCCESS,
     __app_name__,
     __version__,
-    cli,
     pigeonhole,
 )
 
@@ -83,7 +81,7 @@ def test_get_dir(mock_db, mock_flags, mock_dir, flags, expected):
     phc = pigeonhole.PH_Controller(mock_db, mock_flags)
     dir_result = phc.get_dir_data(mock_dir)
     print(dir_result.dir_data)
-    assert dir_result.error == 0
+    assert dir_result.error == SUCCESS
     assert dir_result.dir_data == expected
 
 @pytest.mark.parametrize("databases", [
@@ -99,7 +97,7 @@ def test_get_db(mock_db, mock_flags, databases):
     phc = pigeonhole.PH_Controller(mock_db, mock_flags)
     db_result = phc.get_db_data()
     print(db_result.data)
-    assert db_result.error == 0
+    assert db_result.error == SUCCESS
     assert db_result.data == databases
 
 @pytest.mark.parametrize("flags", [
@@ -115,7 +113,7 @@ def test_get_flags(mock_db, mock_flags, flags):
     phc = pigeonhole.PH_Controller(mock_db, mock_flags)
     flags_result = phc.get_flags_data()
     print(flags_result.flags)
-    assert flags_result.error == 0
+    assert flags_result.error == SUCCESS
     assert flags_result.flags == flags
 
 @pytest.mark.parametrize("databases", [
@@ -127,7 +125,7 @@ def test_get_flags(mock_db, mock_flags, flags):
 def test_set_db(mock_db, mock_flags, databases):
     phc = pigeonhole.PH_Controller(mock_db, mock_flags)
     write_result = phc.set_db_data(databases)
-    assert write_result.error == 0
+    assert write_result.error == SUCCESS
     read_result = phc.get_db_data()
     assert read_result.data == databases
 
@@ -140,6 +138,6 @@ def test_set_db(mock_db, mock_flags, databases):
 def test_set_flags(mock_db, mock_flags, flags):
     phc = pigeonhole.PH_Controller(mock_db, mock_flags)
     write_result = phc.set_flags_data(flags)
-    assert write_result.error == 0
+    assert write_result.error == SUCCESS
     read_result = phc.get_flags_data()
     assert read_result.flags == flags
