@@ -41,19 +41,18 @@ def update_db() -> None:
         typer.secho(f'Displaying items failed with "{ERRORS[dir_result.error]}"', fg=typer.colors.RED,)
         raise typer.Exit(1)
     
-    if len(db_result.data) != len(dir_result.dir_data):
-        formatted_files = []
-        for item in dir_result.dir_data:
-            format_result = phc.format_item(item)
-            if format_result.error:
-                typer.secho(f'Update failed with "{ERRORS[format_result.error]}"', fg=typer.colors.RED)
-                raise typer.Exit(1)
-            formatted_files.append(format_result.item_data)
-
-        write_result = phc.set_db_data(formatted_files)
-        if write_result.error:
-            typer.secho(f'Update failed with "{ERRORS[write_result.error]}"', fg=typer.colors.RED)
+    formatted_files = []
+    for item in dir_result.dir_data:
+        format_result = phc.format_item(item)
+        if format_result.error:
+            typer.secho(f'Update failed with "{ERRORS[format_result.error]}"', fg=typer.colors.RED)
             raise typer.Exit(1)
+        formatted_files.append(format_result.item_data)
+
+    write_result = phc.set_db_data(formatted_files)
+    if write_result.error:
+        typer.secho(f'Update failed with "{ERRORS[write_result.error]}"', fg=typer.colors.RED)
+        raise typer.Exit(1)
 
 
 def display_db() -> None:
@@ -209,8 +208,25 @@ def sort(
         raise typer.Exit(1)
 
     curr_db = db_result.data
-    dirs = []
-    files = []
+    dirs = [item for item in curr_db if item["Mode"] == "drwxr-xr-x"]
+    files = [item for item in curr_db if item["Mode"] == "-rw-r--r--"]
+    dirs = sorted(dirs, key=lambda x: x[sorting_key])
+    files = sorted(files, key=lambda x: x[sorting_key])
+    curr_db = sorted(curr_db, key=lambda x: x[sorting_key])
+
+    if reverse_order:
+        dirs = dirs[::-1]
+        files = files[::-1]
+        curr_db = curr_db[::-1]
+    
+    dirs.extend(files)
+    if sorting_key in ["Name", "Ext."]:
+        write_db = phc.set_db_data(dirs)
+    else:
+        write_db = phc.set_db_data(curr_db)
+    if write_db.error:
+        typer.secho(f'Sorting items failed with "{ERRORS[write_db.error]}"', fg=typer.colors.RED,)
+        raise typer.Exit(1)
 
     if flag_result.flags["repeat_show"]:
         display_db()
