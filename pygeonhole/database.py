@@ -4,7 +4,7 @@ from pathlib import Path
 from os import getcwd
 from typing import Any, Dict, List, NamedTuple
 
-from pigeonhole import DB_READ_ERROR, DB_WRITE_ERROR, JSON_ERROR, SUCCESS
+from pygeonhole import DB_READ_ERROR, DB_WRITE_ERROR, JSON_ERROR, SUCCESS
 
 ITEM_DATA = {
     "Name": "item_name",

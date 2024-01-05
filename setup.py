@@ -10,7 +10,7 @@ with (HERE / "requirements.txt").open() as f:
     requirements = f.read().splitlines()
 
 setup(
-    name="file-organizer",
+    name="pygeonhole-cli",
     version="0.1.0",
     description="python cli program to organize files",
     long_description=README,
@@ -21,7 +21,7 @@ setup(
     # license="MIT",
     entry_points={
         'console_scripts': [
-            'pigeonhole = pigeonhole.__main__:main',
+            'pygeonhole-cli = pygeonhole.__main__:main',
         ],
     },
     python_requires='>=3.8',
@@ -29,7 +29,7 @@ setup(
     #     "License :: OSI Approved :: MIT License",
     #     "Programming Language :: Python :: 3",
     # ],
-    packages=["pigeonhole"],
+    packages=["pygeonhole"],
     include_package_data=True,
     install_requires=requirements,
 )

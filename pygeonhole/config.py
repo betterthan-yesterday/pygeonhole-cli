@@ -3,7 +3,7 @@ from pathlib import Path
 
 import typer
 
-from pigeonhole import (
+from pygeonhole import (
     DB_WRITE_ERROR, DIR_ERROR, FILE_ERROR, SUCCESS, __app_name__
 )
 

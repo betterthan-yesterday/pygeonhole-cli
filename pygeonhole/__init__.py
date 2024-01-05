@@ -1,4 +1,4 @@
-__app_name__ = "pigeonhole"
+__app_name__ = "pygeonhole-cli"
 __version__ = "0.1.0"
 
 (

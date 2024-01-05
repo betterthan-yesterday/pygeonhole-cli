@@ -5,9 +5,9 @@ import stat
 from pathlib import Path
 from typing import Any, Dict, List, NamedTuple
 
-from pigeonhole import SUCCESS, DIR_READ_ERROR
-from pigeonhole.database import DatabaseHandler, DatabaseData, ITEM_DATA
-from pigeonhole.flags import FlagsHandler, FlagsData
+from pygeonhole import SUCCESS, DIR_READ_ERROR
+from pygeonhole.database import DatabaseHandler, DatabaseData, ITEM_DATA
+from pygeonhole.flags import FlagsHandler, FlagsData
 
 class ItemData(NamedTuple):
     item_data: Dict[str, Any]

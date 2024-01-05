@@ -5,14 +5,14 @@ import os
 
 import typer
 
-from pigeonhole import (
-    ERRORS, __app_name__, __version__, config, database, flags, pigeonhole
+from pygeonhole import (
+    ERRORS, __app_name__, __version__, config, database, flags, pygeonhole
 )
-from pigeonhole import EXPORT_ERROR, PATH_ERROR
+from pygeonhole import EXPORT_ERROR, PATH_ERROR
 
 app = typer.Typer()
 
-def get_PHC() -> pigeonhole.PH_Controller:
+def get_PHC() -> pygeonhole.PH_Controller:
     if config.CONFIG_FILE_PATH.exists():
         db_path = database.get_database_path(config.CONFIG_FILE_PATH)
         flags_path = flags.get_flags_path(config.CONFIG_FILE_PATH)
@@ -20,7 +20,7 @@ def get_PHC() -> pigeonhole.PH_Controller:
         typer.secho('Config file not found. Please run "pigeonhole init"', fg=typer.colors.RED)
         raise typer.Exit(1)
     if db_path.exists() and flags_path.exists():
-        return pigeonhole.PH_Controller(db_path, flags_path)
+        return pygeonhole.PH_Controller(db_path, flags_path)
     else:
         typer.secho('Database not found. Please run "pigeonhole init"', fg=typer.colors.RED)
         raise typer.Exit(1)

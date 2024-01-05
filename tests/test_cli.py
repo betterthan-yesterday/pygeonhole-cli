@@ -2,12 +2,12 @@ import json
 import pytest
 from typer.testing import CliRunner
 
-from pigeonhole import (
+from pygeonhole import (
     SUCCESS,
     __app_name__,
     __version__,
     cli,
-    pigeonhole,
+    pygeonhole,
 )
 
 from tests.test_pigeonhole import dir_result, file_result, hidden_result, mock_dir, mock_flags, mock_db

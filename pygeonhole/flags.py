@@ -3,8 +3,8 @@ import json
 from pathlib import Path
 from typing import Any, Dict, List, NamedTuple
 
-from pigeonhole import FLAGS_READ_ERROR, FLAGS_WRITE_ERROR, JSON_ERROR, SUCCESS
-from pigeonhole.database import CWD_NAME
+from pygeonhole import FLAGS_READ_ERROR, FLAGS_WRITE_ERROR, JSON_ERROR, SUCCESS
+from pygeonhole.database import CWD_NAME
 
 FLAGS = {
     "show_hidden": False,

@@ -2,11 +2,11 @@ import json
 import pytest
 from typer.testing import CliRunner
 
-from pigeonhole import (
+from pygeonhole import (
     SUCCESS,
     __app_name__,
     __version__,
-    pigeonhole,
+    pygeonhole,
 )
 
 dir_result = {
@@ -77,7 +77,7 @@ def test_get_dir(mock_db, mock_flags, mock_dir, flags, expected):
     with mock_flags.open("w") as db:
         json.dump(flags, db, indent=4)
 
-    phc = pigeonhole.PH_Controller(mock_db, mock_flags)
+    phc = pygeonhole.PH_Controller(mock_db, mock_flags)
     dir_result = phc.get_dir_data(mock_dir)
     print(dir_result.dir_data)
     assert dir_result.error == SUCCESS
@@ -93,7 +93,7 @@ def test_get_db(mock_db, mock_flags, databases):
     with mock_db.open("w") as db:
         json.dump(databases, db, indent=4)
 
-    phc = pigeonhole.PH_Controller(mock_db, mock_flags)
+    phc = pygeonhole.PH_Controller(mock_db, mock_flags)
     db_result = phc.get_db_data()
     print(db_result.data)
     assert db_result.error == SUCCESS
@@ -109,7 +109,7 @@ def test_get_flags(mock_db, mock_flags, flags):
     with mock_flags.open("w") as db:
         json.dump(flags, db, indent=4)
 
-    phc = pigeonhole.PH_Controller(mock_db, mock_flags)
+    phc = pygeonhole.PH_Controller(mock_db, mock_flags)
     flags_result = phc.get_flags_data()
     print(flags_result.flags)
     assert flags_result.error == SUCCESS
@@ -122,7 +122,7 @@ def test_get_flags(mock_db, mock_flags, flags):
     [dir_result, file_result, hidden_result],
 ])
 def test_set_db(mock_db, mock_flags, databases):
-    phc = pigeonhole.PH_Controller(mock_db, mock_flags)
+    phc = pygeonhole.PH_Controller(mock_db, mock_flags)
     write_result = phc.set_db_data(databases)
     assert write_result.error == SUCCESS
     read_result = phc.get_db_data()
@@ -135,7 +135,7 @@ def test_set_db(mock_db, mock_flags, databases):
     {"show_hidden": True, "show_dirs": True},
 ])
 def test_set_flags(mock_db, mock_flags, flags):
-    phc = pigeonhole.PH_Controller(mock_db, mock_flags)
+    phc = pygeonhole.PH_Controller(mock_db, mock_flags)
     write_result = phc.set_flags_data(flags)
     assert write_result.error == SUCCESS
     read_result = phc.get_flags_data()
