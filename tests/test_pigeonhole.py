@@ -1,6 +1,5 @@
 import json
 import pytest
-import os
 from typer.testing import CliRunner
 
 from pigeonhole import (

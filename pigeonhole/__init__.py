@@ -11,8 +11,9 @@ __version__ = "0.1.0"
     FLAGS_WRITE_ERROR,
     JSON_ERROR,
     DIR_READ_ERROR,
-    ID_ERROR,
-) = range(10)
+    EXPORT_ERROR,
+    PATH_ERROR,
+) = range(11)
 
 ERRORS = {
     DIR_ERROR: "config directory error",
@@ -22,6 +23,7 @@ ERRORS = {
     FLAGS_READ_ERROR: "flags read error",
     FLAGS_WRITE_ERROR: "flags write error",
     DIR_READ_ERROR: "directory read error",
-    ID_ERROR: "file id error",
+    EXPORT_ERROR: "export items error",
+    PATH_ERROR: "unidentified path error",
     JSON_ERROR: "json format error"
 }
