@@ -10,8 +10,6 @@ from pygeonhole import (
     pygeonhole,
 )
 
-from tests.test_pigeonhole import dir_result, file_result, hidden_result, mock_dir, mock_flags, mock_db
-
 runner = CliRunner()
 
 def test_version():

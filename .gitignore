@@ -1,11 +1,12 @@
 venv/
-todo
-.file-organizer_ph.json
-.file-organizer_ph_flags.json
+
+.pygeonhole-cli_ph.json
+.pygeonhole-cli_ph_flags.json
 
 # For setup.py
-file_organizer.egg-info/
+pygeonhole-cli.egg-info/
 
 test.py
+todo
 
 *__pycache__

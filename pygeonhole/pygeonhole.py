@@ -1,5 +1,5 @@
 # Pigeonhole Model Controller
-import datetime
+# import datetime # import is used in format when ITEM_DATA is retrieved
 import os
 import stat
 from pathlib import Path
@@ -81,55 +81,3 @@ class PH_Controller:
     def set_flags_data(self, flags_data: Dict[str, Any]) -> FlagsData:
         write_result = self._flags_handler.write_flags_data(flags_data)
         return write_result
-
-
-    # def add(self, description: List[str], priority: int=2) -> CurrentTodo:
-    #     description_text = " ".join (description)
-    #     if not description_text.endswith("."):
-    #         description_text += "."
-    #     todo = {
-    #         "Description": description_text,
-    #         "Priority": priority,
-    #         "Done": False,
-    #     }
-    #     read = self._db_handler.read_todos()
-    #     if read.error == DB_READ_ERROR:
-    #         return CurrentTodo(todo, read.error)
-    #     read.todo_list.append(todo)
-    #     write = self._db_handler.write_todos(read.todo_list)
-    #     return CurrentTodo(todo, write.error)
-    
-    # def get_todo_list(self) -> List[Dict[str, Any]]:
-    #     read = self._db_handler.read_todos()
-    #     return read.todo_list
-    
-    # def set_done(self, todo_id: int) -> CurrentTodo:
-    #     read = self._db_handler.read_todos()
-    #     if read.error:
-    #         return CurrentTodo({}, read.error)
-        
-    #     try:
-    #         todo = read.todo_list[todo_id - 1]
-    #     except IndexError:
-    #         return CurrentTodo({}, ID_ERROR)
-        
-    #     todo["Done"] = True
-    #     write = self._db_handler.write_todos(read.todo_list)
-    #     return CurrentTodo(todo, write.error)
-    
-    # def remove(self, todo_id: int) -> CurrentTodo:
-    #     read = self._db_handler.read_todos()
-    #     if read.error:
-    #         return CurrentTodo({}, read.error)
-        
-    #     try:
-    #         todo = read.todo_list.pop(todo_id - 1)
-    #     except IndexError:
-    #         return CurrentTodo({}, ID_ERROR)
-        
-    #     write = self._db_handler.write_todos(read.todo_list)
-    #     return CurrentTodo(todo, write.error)
-    
-    # def clear(self) -> CurrentTodo:
-    #     write = self._db_handler.write_todos([])
-    #     return CurrentTodo({}, write.error)
