@@ -1,2 +1,0 @@
-[console_scripts]
-pygeonhole-cli = pygeonhole.__main__:main
