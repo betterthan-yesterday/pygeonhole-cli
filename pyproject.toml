@@ -1,0 +1,30 @@
+[project]
+name = "pygeonhole-cli"
+version = "1.0.0"
+description = "python cli program to organize files"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {file = "LICENSE.txt"}
+keywords = ["typer", "cli", "file"]
+authors = [
+  {name = "William Pol", email = "polwilliam0@gmail.com" }
+]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3"
+]
+dynamic = ["dependencies"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[project.urls]
+"Homepage" = "https://github.com/betterthan-yesterday/pygeonhole-cli.git"
+
+[project.scripts]
+pygeonhole-cli = "pygeonhole.__main__:main"
+
+[build-system]
+requires = ["setuptools>=43.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
