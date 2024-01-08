@@ -1,9 +1,9 @@
 # Pigeonhole Model Controller
-import datetime # import is used in format when ITEM_DATA is retrieved
 import os
 import stat
 from pathlib import Path
 from typing import Any, Dict, List, NamedTuple
+from datetime import datetime # import is used in format when ITEM_DATA is retrieved
 
 from pygeonhole import SUCCESS, DIR_READ_ERROR
 from pygeonhole.database import DatabaseHandler, DatabaseData, ITEM_DATA
