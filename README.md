@@ -79,8 +79,8 @@ can be installed by running `pip install pygeonhole-cli`.
 
 Other sources:
 
-- PyPI: 
-- GitHub: 
+- PyPI: https://pypi.org/project/pygeonhole-cli/1.0.0/
+- GitHub: https://github.com/betterthan-yesterday/pygeonhole-cli
 
 Note: Compatibility with Windows not yet tested.
 
