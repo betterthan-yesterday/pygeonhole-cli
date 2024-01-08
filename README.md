@@ -1,4 +1,6 @@
 # pygeonhole-cli
+[![PyPI version](https://badge.fury.io/py/pygeonhole-cli.svg)](https://badge.fury.io/py/pygeonhole-cli)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 pygeonhole-cli is a convenient python package that can 
 list, sort, and customize the contents of the current 
