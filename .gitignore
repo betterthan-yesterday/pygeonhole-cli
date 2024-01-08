@@ -3,8 +3,9 @@ venv/
 .pygeonhole-cli_ph.json
 .pygeonhole-cli_ph_flags.json
 
-# For setup.py
-pygeonhole-cli.egg-info/
+# For pyproject
+dist/
+pygeonhole_cli.egg-info/
 
 test.py
 todo

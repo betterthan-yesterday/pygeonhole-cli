@@ -1,5 +1,5 @@
 # Pigeonhole Model Controller
-# import datetime # import is used in format when ITEM_DATA is retrieved
+import datetime # import is used in format when ITEM_DATA is retrieved
 import os
 import stat
 from pathlib import Path
