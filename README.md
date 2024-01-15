@@ -86,6 +86,17 @@ Other sources:
 
 Note: Compatibility with Windows not yet tested.
 
+## Running tests
+
+pytest is used to test the package and is already listed in `requirements.txt`.
+
+To run tests:
+```sh
+python -m pytest tests/
+```
+
+Note: On Github, the pytest check fails, but will run fine when cloned.
+
 ## Meta
 
 William Pol - polwilliam0@gmail.com

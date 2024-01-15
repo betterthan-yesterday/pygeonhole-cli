@@ -17,12 +17,12 @@ def get_PHC() -> pygeonhole.PH_Controller:
         db_path = database.get_database_path(config.CONFIG_FILE_PATH)
         flags_path = flags.get_flags_path(config.CONFIG_FILE_PATH)
     else:
-        typer.secho('Config file not found. Please run "pigeonhole init"', fg=typer.colors.RED)
+        typer.secho('Config file not found. Please run "pygeonhole-cli init"', fg=typer.colors.RED)
         raise typer.Exit(1)
     if db_path.exists() and flags_path.exists():
         return pygeonhole.PH_Controller(db_path, flags_path)
     else:
-        typer.secho('Database not found. Please run "pigeonhole init"', fg=typer.colors.RED)
+        typer.secho('Database not found. Please run "pygeonhole-cli init"', fg=typer.colors.RED)
         raise typer.Exit(1)
 
 """
